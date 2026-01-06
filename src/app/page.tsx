@@ -32,7 +32,6 @@ export default function Home() {
   const NUMERO_GANHADOR: number | null = null; 
   const LINK_VIDEO_RESULTADO = "https://youtube.com"; 
 
-  // --- LISTA DE PRÊMIOS ---
   const premios = [
     {
       url: "https://placehold.co/800x500/107c10/FFF.png?text=FOTO+DO+XBOX+ONE+X",
@@ -60,7 +59,6 @@ export default function Home() {
     }
   ];
 
-  // --- FORMATAÇÃO 000 (3 DÍGITOS) ---
   const formatarNumero = (n: number) => n.toString().padStart(3, '0');
 
   useEffect(() => {
@@ -95,11 +93,22 @@ export default function Home() {
     setSelecionados((prev) => prev.includes(num) ? prev.filter((n) => n !== num) : [...prev, num]);
   };
 
+  // --- MÁSCARA FLUIDA DE WHATSAPP ---
   const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let v = e.target.value.replace(/\D/g, "");
-    if (v.length > 11) v = v.slice(0, 11);
-    if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
-    if (v.length > 8) v = `${v.slice(0, 10)}-${v.slice(10)}`;
+    let v = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
+    
+    if (v.length > 11) v = v.slice(0, 11); // Limite de 11 números
+
+    // Só adiciona parênteses se tiver mais que 2 números (DDD)
+    if (v.length > 2) {
+      v = v.replace(/^(\d{2})/, "($1) ");
+    }
+
+    // Só adiciona o traço se tiver mais que 7 números (DDD + 5 dígitos)
+    if (v.length > 7) {
+      v = v.replace(/(\d{5})(\d)/, "$1-$2");
+    }
+
     setWhatsapp(v);
   };
 
@@ -121,10 +130,9 @@ export default function Home() {
     }
   };
 
-  // --- NOVA FUNÇÃO: Voltar para corrigir dados ---
   const voltarParaCadastro = () => {
-    setUsuarioIdentificado(false); // Desbloqueia os inputs
-    setEtapa(1); // Volta para tela 1
+    setUsuarioIdentificado(false);
+    setEtapa(1);
   };
 
   const enviarComprovante = () => {
@@ -142,7 +150,6 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50 flex items-center justify-center p-2 font-sans antialiased relative">
       <Toaster position="top-center" richColors />
 
-      {/* MODAL AJUDA */}
       {mostrarAjuda && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl w-full max-w-xs p-6 shadow-2xl relative">
@@ -160,19 +167,15 @@ export default function Home() {
 
       <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden relative flex flex-col h-auto max-h-[98vh] transition-all duration-300">
         
-        {/* HEADER */}
         <div className="pt-5 pb-3 px-6 border-b border-slate-50 flex items-center justify-between bg-white z-20 shrink-0">
           <div><h1 className="text-lg font-bold text-slate-900 leading-tight">Rifa Xbox One X</h1><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Edição Especial 1TB</p></div>
           {whatsapp.length >= 14 && (<button onClick={() => setVendoMeusPedidos(!vendoMeusPedidos)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all border ${vendoMeusPedidos ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100"}`}>{vendoMeusPedidos ? <X size={14} /> : <Ticket size={14} />}{vendoMeusPedidos ? "Fechar" : "Meus Bilhetes"}</button>)}
         </div>
 
-        {/* --- TELA MEUS BILHETES --- */}
         {vendoMeusPedidos ? (
           <div className="flex-1 p-6 animate-in fade-in slide-in-from-bottom-4 bg-slate-50/50 overflow-y-auto">
             <div className="text-center mb-6"><h2 className="text-base font-bold text-slate-900">Olá, {nome.split(' ')[0] || 'Cliente'}!</h2><p className="text-xs text-slate-500">Gerencie seus pedidos aqui</p></div>
-
             <div className="space-y-4">
-              {/* RESULTADO */}
               <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 shadow-sm relative overflow-hidden">
                 <div className="absolute -right-4 -top-4 opacity-10"><Trophy size={80} className="text-purple-600" /></div>
                 <div className="flex items-center gap-2 mb-2 text-purple-700 relative z-10"><Trophy size={18} /><span className="text-xs font-bold uppercase tracking-wider">Sorteio</span></div>
@@ -186,7 +189,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* PAGAMENTO */}
               {pendentes.length > 0 && (
                 <div className="bg-white p-4 rounded-xl border border-amber-200 shadow-sm space-y-4 animate-in slide-in-from-bottom-2">
                   <div className="bg-amber-50 p-4 rounded-lg border border-amber-100 text-center">
@@ -208,15 +210,12 @@ export default function Home() {
                 <div className="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm"><div className="flex items-center gap-2 mb-3 text-emerald-600"><Check size={16} strokeWidth={3} /><span className="text-xs font-bold uppercase tracking-wider">Pagamento Confirmado</span></div><div className="flex flex-wrap gap-1.5">{confirmados.map(n => <span key={n.numero} className="px-2 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded text-xs font-bold">#{formatarNumero(n.numero)}</span>)}</div></div>
               )}
             </div>
-            
             <div className="mt-8"><button onClick={() => { setVendoMeusPedidos(false); setEtapa(2); }} className="w-full h-12 bg-blue-600 text-white rounded-lg font-bold text-sm shadow-md hover:bg-blue-700 transition-all flex items-center justify-center gap-2"><Ticket size={16} /> Comprar mais números</button></div>
           </div>
         ) : (
-          /* --- FLUXO DE COMPRA --- */
           <>
             <div className="w-full h-1 bg-slate-100 shrink-0"><div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${(etapa / 3) * 100}%` }} /></div>
             
-            {/* ETAPA 1 */}
             {etapa === 1 && (
               <div className="flex-1 flex flex-col animate-in fade-in">
                 <div className="relative w-full aspect-video bg-slate-100 overflow-hidden group">
@@ -257,7 +256,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* ETAPA 2 - COM BOTÃO DE VOLTAR */}
             {etapa === 2 && (
               <div className="flex flex-col h-full min-h-0 animate-in fade-in">
                 <div className="pt-3 pb-2 px-6 text-center shrink-0 relative">
@@ -275,16 +273,11 @@ export default function Home() {
                 
                 <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20 space-y-3">
                   {selecionados.length > 0 ? (<button onClick={() => setEtapa(3)} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center justify-between px-5 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all"><span className="text-xs font-medium text-blue-100 uppercase tracking-wide">{selecionados.length} selecionado(s)</span><span className="text-base">Concluir R$ {(selecionados.length * 5).toFixed(2)}</span></button>) : (<div className="w-full text-center text-slate-400 text-xs font-bold uppercase tracking-wide py-3 bg-slate-50 rounded-lg border border-slate-200 border-dashed">Selecione seus números</div>)}
-                  
-                  {/* BOTÃO DE VOLTAR PARA DADOS */}
-                  <button onClick={voltarParaCadastro} className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-1">
-                    <ChevronLeft size={14} /> Voltar e corrigir meus dados
-                  </button>
+                  <button onClick={voltarParaCadastro} className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-1"><ChevronLeft size={14} /> Voltar e corrigir meus dados</button>
                 </div>
               </div>
             )}
 
-            {/* ETAPA 3 - CONFIRMAÇÃO DA RESERVA */}
             {etapa === 3 && (
               <div className="flex flex-col animate-in fade-in duration-300 p-6">
                 <div className="text-center mb-6"><h1 className="text-lg font-bold text-slate-900">Confirme o pedido</h1><p className="text-xs text-slate-500 mt-1">Verifique seus números antes de enviar</p></div>
