@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRifa } from "@/hooks/useRifa";
-import { ChevronRight, ChevronLeft, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send } from "lucide-react";
+import { ChevronRight, ChevronLeft, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send, User } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
 interface NumeroRifa {
@@ -29,10 +29,10 @@ export default function Home() {
   const CHAVE_PIX_FORMATADA = "(11) 98110-2244";
   
   const DATA_SORTEIO = "28/03/2026"; 
-  const NUMERO_GANHADOR: number | null = null; // Ex: 750
+  const NUMERO_GANHADOR: number | null = null; 
   const LINK_VIDEO_RESULTADO = "https://youtube.com"; 
 
-  // --- VITRINE DE PRÊMIOS ---
+  // --- LISTA DE PRÊMIOS ---
   const premios = [
     {
       url: "https://placehold.co/800x500/107c10/FFF.png?text=FOTO+DO+XBOX+ONE+X",
@@ -79,13 +79,11 @@ export default function Home() {
   const pendentes = meusPedidosGeral.filter(n => n.status === 'reservado');
   const confirmados = meusPedidosGeral.filter(n => n.status === 'pago');
 
-  // Lógica de Paginação (100 por página)
   const numerosLote = useMemo(() => {
     const inicio = lote * 100;
     return numeros.slice(inicio, inicio + 100);
   }, [numeros, lote]);
 
-  // Texto descritivo da página atual (Ex: "000 a 099")
   const textoPaginacao = useMemo(() => {
     const inicio = lote * 100;
     const fim = inicio + 99;
@@ -123,15 +121,18 @@ export default function Home() {
     }
   };
 
+  // --- NOVA FUNÇÃO: Voltar para corrigir dados ---
+  const voltarParaCadastro = () => {
+    setUsuarioIdentificado(false); // Desbloqueia os inputs
+    setEtapa(1); // Volta para tela 1
+  };
+
   const enviarComprovante = () => {
     if (pendentes.length === 0) return;
     const listaNumeros = pendentes.map(p => formatarNumero(p.numero)).join(", ");
     const total = (pendentes.length * 5).toFixed(2);
     const primeiroNome = nome.split(' ')[0];
-    
-    // Mensagem Limpa (Sem emojis conflitantes)
     const msg = `*COMPROVANTE DE RIFA*\n\n*Nome:* ${primeiroNome}\n*Numeros:* ${listaNumeros}\n*Total:* R$ ${total}\n\nSegue o comprovante do PIX abaixo:`;
-    
     window.open(`https://wa.me/5511981102244?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
@@ -215,6 +216,7 @@ export default function Home() {
           <>
             <div className="w-full h-1 bg-slate-100 shrink-0"><div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${(etapa / 3) * 100}%` }} /></div>
             
+            {/* ETAPA 1 */}
             {etapa === 1 && (
               <div className="flex-1 flex flex-col animate-in fade-in">
                 <div className="relative w-full aspect-video bg-slate-100 overflow-hidden group">
@@ -255,7 +257,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* ETAPA 2 */}
+            {/* ETAPA 2 - COM BOTÃO DE VOLTAR */}
             {etapa === 2 && (
               <div className="flex flex-col h-full min-h-0 animate-in fade-in">
                 <div className="pt-3 pb-2 px-6 text-center shrink-0 relative">
@@ -263,7 +265,6 @@ export default function Home() {
                   <div className="flex justify-center gap-3 mt-2 text-[9px] font-bold uppercase tracking-wider text-slate-500"><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-white border border-slate-300 shadow-sm"></div>Livre</div><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-amber-300 border border-amber-400"></div>Reservado</div><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-red-500 border border-red-600"></div>Pago</div></div>
                 </div>
                 
-                {/* BARRA DE PAGINAÇÃO ATUALIZADA */}
                 <div className="flex items-center justify-between px-4 py-1.5 border-b border-slate-50 shrink-0">
                   <button onClick={() => setLote((l) => Math.max(0, l - 1))} className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-md transition-all"><ChevronLeft size={20} /></button>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{textoPaginacao}</span>
@@ -271,7 +272,15 @@ export default function Home() {
                 </div>
 
                 <div className="flex-1 p-2 overflow-y-auto bg-slate-50/30"><div className="grid grid-cols-10 gap-1 w-full max-w-[380px] mx-auto">{numerosLote.map((n: NumeroRifa) => (<button key={n.numero} disabled={n.status !== "disponivel"} onClick={() => toggleNumero(n.numero, n.status)} className={`aspect-square flex items-center justify-center rounded-[4px] text-[10px] font-bold transition-all border shadow-sm ${n.status === "pago" ? "bg-red-500 text-white border-red-600 opacity-90 cursor-not-allowed" : ""} ${n.status === "reservado" ? "bg-amber-300 text-amber-900 border-amber-400 cursor-not-allowed" : ""} ${n.status === "disponivel" && !selecionados.includes(n.numero) ? "bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600" : ""} ${selecionados.includes(n.numero) ? "bg-blue-600 text-white border-blue-600 scale-105 z-10 shadow-md" : ""}`}>{formatarNumero(n.numero)}</button>))}</div></div>
-                <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20">{selecionados.length > 0 ? (<button onClick={() => setEtapa(3)} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center justify-between px-5 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all"><span className="text-xs font-medium text-blue-100 uppercase tracking-wide">{selecionados.length} selecionado(s)</span><span className="text-base">Concluir R$ {(selecionados.length * 5).toFixed(2)}</span></button>) : (<div className="w-full text-center text-slate-400 text-xs font-bold uppercase tracking-wide py-3 bg-slate-50 rounded-lg border border-slate-200 border-dashed">Selecione seus números</div>)}</div>
+                
+                <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20 space-y-3">
+                  {selecionados.length > 0 ? (<button onClick={() => setEtapa(3)} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center justify-between px-5 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all"><span className="text-xs font-medium text-blue-100 uppercase tracking-wide">{selecionados.length} selecionado(s)</span><span className="text-base">Concluir R$ {(selecionados.length * 5).toFixed(2)}</span></button>) : (<div className="w-full text-center text-slate-400 text-xs font-bold uppercase tracking-wide py-3 bg-slate-50 rounded-lg border border-slate-200 border-dashed">Selecione seus números</div>)}
+                  
+                  {/* BOTÃO DE VOLTAR PARA DADOS */}
+                  <button onClick={voltarParaCadastro} className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-1">
+                    <ChevronLeft size={14} /> Voltar e corrigir meus dados
+                  </button>
+                </div>
               </div>
             )}
 
