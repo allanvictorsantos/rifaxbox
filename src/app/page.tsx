@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRifa } from "@/hooks/useRifa";
-import { ChevronRight, ChevronLeft, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send, ShieldAlert, AlertTriangle } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
 interface NumeroRifa {
@@ -21,42 +21,20 @@ export default function Home() {
   const [vendoMeusPedidos, setVendoMeusPedidos] = useState(false);
   const [usuarioIdentificado, setUsuarioIdentificado] = useState(false);
   const [mostrarAjuda, setMostrarAjuda] = useState(false);
-  
   const [imagemAtual, setImagemAtual] = useState(0);
 
   // --- CONFIGURAÇÕES ---
   const CHAVE_PIX = "11981102244"; 
   const CHAVE_PIX_FORMATADA = "(11) 98110-2244";
-  
   const DATA_SORTEIO = "28/03/2026"; 
   const NUMERO_GANHADOR: number | null = null; 
   const LINK_VIDEO_RESULTADO = "https://youtube.com"; 
 
   const premios = [
-    {
-      url: "https://placehold.co/800x500/107c10/FFF.png?text=FOTO+DO+XBOX+ONE+X",
-      titulo: "Xbox One X 1TB",
-      desc: "Console 4K Nativo - Edição Preta",
-      badge: "Prêmio Principal"
-    },
-    {
-      url: "https://placehold.co/800x500/333333/FFF.png?text=FOTO+DOS+2+CONTROLES",
-      titulo: "2 Controles Originais",
-      desc: "1 Preto + 1 Branco (Impecáveis)",
-      badge: "Acessório"
-    },
-    {
-      url: "https://placehold.co/800x500/555555/FFF.png?text=FOTO+DOS+3+JOGOS",
-      titulo: "Kit de Jogos",
-      desc: "CoD Advanced + Infinite Warfare + Forza Horizon 2",
-      badge: "3 Jogos Físicos"
-    },
-    {
-      url: "https://placehold.co/800x500/777777/FFF.png?text=FOTO+CARREGADOR",
-      titulo: "Kit Energia",
-      desc: "Carregador Duracell + Cabo HDMI Premium",
-      badge: "Bônus"
-    }
+    { url: "https://placehold.co/800x500/107c10/FFF.png?text=FOTO+DO+XBOX+ONE+X", title: "Xbox One X 1TB", desc: "4K Nativo", badge: "Principal" },
+    { url: "https://placehold.co/800x500/333333/FFF.png?text=FOTO+DOS+2+CONTROLES", title: "2 Controles", desc: "Originais", badge: "Acessório" },
+    { url: "https://placehold.co/800x500/555555/FFF.png?text=FOTO+DOS+3+JOGOS", title: "3 Jogos", desc: "Mídia Física", badge: "Bônus" },
+    { url: "https://placehold.co/800x500/777777/FFF.png?text=FOTO+CARREGADOR", title: "Kit Energia", desc: "Carregador + Pilhas", badge: "Extra" }
   ];
 
   const formatarNumero = (n: number) => n.toString().padStart(3, '0');
@@ -93,28 +71,17 @@ export default function Home() {
     setSelecionados((prev) => prev.includes(num) ? prev.filter((n) => n !== num) : [...prev, num]);
   };
 
-  // --- MÁSCARA FLUIDA DE WHATSAPP ---
   const handleWhatsappChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let v = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
-    
-    if (v.length > 11) v = v.slice(0, 11); // Limite de 11 números
-
-    // Só adiciona parênteses se tiver mais que 2 números (DDD)
-    if (v.length > 2) {
-      v = v.replace(/^(\d{2})/, "($1) ");
-    }
-
-    // Só adiciona o traço se tiver mais que 7 números (DDD + 5 dígitos)
-    if (v.length > 7) {
-      v = v.replace(/(\d{5})(\d)/, "$1-$2");
-    }
-
+    let v = e.target.value.replace(/\D/g, "");
+    if (v.length > 11) v = v.slice(0, 11);
+    if (v.length > 2) v = v.replace(/^(\d{2})/, "($1) ");
+    if (v.length > 7) v = v.replace(/(\d{5})(\d)/, "$1-$2");
     setWhatsapp(v);
   };
 
   const copiarPix = () => {
     navigator.clipboard.writeText(CHAVE_PIX);
-    toast.success("Chave PIX copiada!");
+    toast.success("Copiado!");
   };
 
   const finalizarCompra = async () => {
@@ -126,7 +93,7 @@ export default function Home() {
       setUsuarioIdentificado(true);
       setSelecionados([]);
       setVendoMeusPedidos(true); 
-      toast.success("Números reservados! Agora faça o PIX.");
+      toast.success("Reservado!");
     }
   };
 
@@ -165,67 +132,97 @@ export default function Home() {
         </div>
       )}
 
+      {/* ESTILO DO CONTAINER ORIGINAL (Mais largo, mais arredondado, sombra maior) */}
       <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden relative flex flex-col h-auto max-h-[98vh] transition-all duration-300">
         
+        {/* HEADER */}
         <div className="pt-5 pb-3 px-6 border-b border-slate-50 flex items-center justify-between bg-white z-20 shrink-0">
           <div><h1 className="text-lg font-bold text-slate-900 leading-tight">Rifa Xbox One X</h1><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Edição Especial 1TB</p></div>
           {whatsapp.length >= 14 && (<button onClick={() => setVendoMeusPedidos(!vendoMeusPedidos)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all border ${vendoMeusPedidos ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100"}`}>{vendoMeusPedidos ? <X size={14} /> : <Ticket size={14} />}{vendoMeusPedidos ? "Fechar" : "Meus Bilhetes"}</button>)}
         </div>
 
+        {/* --- TELA PAGAMENTO (ESTILO NOVO COM ALERTA VERMELHO) --- */}
         {vendoMeusPedidos ? (
           <div className="flex-1 p-6 animate-in fade-in slide-in-from-bottom-4 bg-slate-50/50 overflow-y-auto">
-            <div className="text-center mb-6"><h2 className="text-base font-bold text-slate-900">Olá, {nome.split(' ')[0] || 'Cliente'}!</h2><p className="text-xs text-slate-500">Gerencie seus pedidos aqui</p></div>
-            <div className="space-y-4">
-              <div className="bg-purple-50 p-4 rounded-xl border border-purple-100 shadow-sm relative overflow-hidden">
-                <div className="absolute -right-4 -top-4 opacity-10"><Trophy size={80} className="text-purple-600" /></div>
-                <div className="flex items-center gap-2 mb-2 text-purple-700 relative z-10"><Trophy size={18} /><span className="text-xs font-bold uppercase tracking-wider">Sorteio</span></div>
-                {NUMERO_GANHADOR !== null ? (
-                  <div className="relative z-10">
-                    <p className="text-xs text-purple-600 mb-2">Número sorteado:</p><div className="text-3xl font-black text-purple-900 mb-3">#{formatarNumero(NUMERO_GANHADOR)}</div>
-                    <button onClick={() => window.open(LINK_VIDEO_RESULTADO, "_blank")} className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-2"><PlayCircle size={16} /> Ver Vídeo</button>
-                  </div>
-                ) : (
-                  <div className="relative z-10"><p className="text-xs text-purple-800 font-medium">Aguardando sorteio pela Loteria Federal.</p><div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-white/60 rounded text-[10px] font-bold text-purple-600 border border-purple-100"><Clock size={12} /> {DATA_SORTEIO}</div></div>
-                )}
+            
+            {NUMERO_GANHADOR !== null && (
+              <div className="bg-purple-600 p-3 rounded-lg text-white text-center mb-3">
+                <p className="text-[10px] font-bold uppercase opacity-80">Número Sorteado</p>
+                <div className="text-2xl font-black">#{formatarNumero(NUMERO_GANHADOR)}</div>
               </div>
+            )}
 
-              {pendentes.length > 0 && (
-                <div className="bg-white p-4 rounded-xl border border-amber-200 shadow-sm space-y-4 animate-in slide-in-from-bottom-2">
-                  <div className="bg-amber-50 p-4 rounded-lg border border-amber-100 text-center">
-                    <p className="text-xs font-bold text-amber-700 uppercase mb-2">1. Copie a chave PIX</p>
-                    <button onClick={copiarPix} className="w-full bg-white border border-amber-200 hover:border-amber-300 rounded-lg p-3 flex items-center justify-between gap-3 group transition-all">
-                      <div className="text-left"><span className="text-[10px] font-bold text-slate-400 block uppercase">Chave Celular</span><code className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{CHAVE_PIX_FORMATADA}</code></div><Copy size={18} className="text-amber-400 group-hover:text-blue-500" />
-                    </button>
-                    <p className="text-xs font-bold text-amber-700 uppercase mt-4 mb-2">2. Envie o Comprovante</p>
-                    <button onClick={enviarComprovante} className="w-full h-10 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"><Send size={16} /> Enviar Comprovante no WhatsApp</button>
+            {/* SE TEM PENDÊNCIA */}
+            {pendentes.length > 0 ? (
+              <div className="bg-white p-4 rounded-xl border border-red-200 shadow-sm space-y-4">
+                
+                {/* ALERTA CRÍTICO */}
+                <div className="flex flex-col gap-2 p-3 bg-red-50 rounded-lg border border-red-200 text-red-800">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={20} className="shrink-0 text-red-600" />
+                    <span className="text-xs font-black uppercase">Atenção: Não é automático!</span>
                   </div>
+                  <p className="text-[11px] leading-tight opacity-90">
+                    O sistema não baixa seu PIX sozinho. Se você não enviar o comprovante no botão verde abaixo, <strong>seus números não serão validados.</strong>
+                  </p>
+                </div>
+
+                {/* PIX E BOTÃO JUNTOS */}
+                <div className="space-y-3">
                   <div>
-                    <div className="flex items-center gap-2 mb-2 text-amber-600"><Clock size={16} className="animate-pulse" /><span className="text-xs font-bold uppercase tracking-wider">Aguardando Validação</span></div>
-                    <div className="flex flex-wrap gap-1.5">{pendentes.map(n => <span key={n.numero} className="px-2 py-1 bg-amber-50 border border-amber-100 text-amber-700 rounded text-xs font-bold">#{formatarNumero(n.numero)}</span>)}</div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase ml-1">1. Copie o PIX</span>
+                    <button onClick={copiarPix} className="w-full bg-slate-50 border border-slate-200 active:bg-blue-50 active:border-blue-300 rounded-lg h-11 flex items-center justify-between px-3 transition-all">
+                      <code className="text-sm font-bold text-slate-700 truncate mr-2">{CHAVE_PIX_FORMATADA}</code>
+                      <Copy size={16} className="text-slate-400" />
+                    </button>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase ml-1">2. Envie o Comprovante (Obrigatório)</span>
+                    <button onClick={enviarComprovante} className="w-full h-11 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-2 shadow-sm uppercase tracking-wide">
+                      <Send size={16} /> Enviar Comprovante Agora
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {confirmados.length > 0 && (
-                <div className="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm"><div className="flex items-center gap-2 mb-3 text-emerald-600"><Check size={16} strokeWidth={3} /><span className="text-xs font-bold uppercase tracking-wider">Pagamento Confirmado</span></div><div className="flex flex-wrap gap-1.5">{confirmados.map(n => <span key={n.numero} className="px-2 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded text-xs font-bold">#{formatarNumero(n.numero)}</span>)}</div></div>
-              )}
-            </div>
-            <div className="mt-8"><button onClick={() => { setVendoMeusPedidos(false); setEtapa(2); }} className="w-full h-12 bg-blue-600 text-white rounded-lg font-bold text-sm shadow-md hover:bg-blue-700 transition-all flex items-center justify-center gap-2"><Ticket size={16} /> Comprar mais números</button></div>
+                <div className="pt-2 border-t border-slate-50 text-center">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold">Seus Números: </span>
+                  <span className="text-xs font-bold text-slate-700">{pendentes.map(n => formatarNumero(n.numero)).join(", ")}</span>
+                </div>
+              </div>
+            ) : null}
+
+            {/* SE JÁ PAGOU */}
+            {confirmados.length > 0 && (
+              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 shadow-sm mt-3 text-center">
+                <div className="flex items-center justify-center gap-2 text-emerald-700 mb-1">
+                  <Check size={16} strokeWidth={3} />
+                  <span className="text-sm font-bold uppercase">Pagamento Confirmado</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-1.5">{confirmados.map(n => <span key={n.numero} className="px-2 py-1 bg-white border border-emerald-200 text-emerald-700 rounded text-xs font-bold">#{formatarNumero(n.numero)}</span>)}</div>
+              </div>
+            )}
+
+            {pendentes.length === 0 && (
+              <button onClick={() => { setVendoMeusPedidos(false); setEtapa(2); }} className="w-full mt-6 h-12 bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2">Comprar mais números</button>
+            )}
           </div>
         ) : (
+          /* --- FLUXO DE COMPRA --- */
           <>
-            <div className="w-full h-1 bg-slate-100 shrink-0"><div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${(etapa / 3) * 100}%` }} /></div>
+            <div className="w-full h-1 bg-slate-100 shrink-0"><div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${(etapa / 2) * 100}%` }} /></div>
             
             {etapa === 1 && (
               <div className="flex-1 flex flex-col animate-in fade-in">
+                {/* CARROSSEL */}
                 <div className="relative w-full aspect-video bg-slate-100 overflow-hidden group">
                   <div className="flex transition-transform duration-500 ease-out h-full" style={{ transform: `translateX(-${imagemAtual * 100}%)` }}>
                     {premios.map((premio, idx) => (
                       <div key={idx} className="min-w-full h-full relative flex items-center justify-center bg-white">
-                        <img src={premio.url} alt={premio.titulo} className="w-full h-full object-cover" />
+                        <img src={premio.url} alt={premio.title} className="w-full h-full object-cover" />
                         <div className="absolute top-3 right-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg uppercase tracking-wider">{premio.badge}</div>
                         <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4 pt-10">
-                          <h3 className="text-white font-bold text-lg">{premio.titulo}</h3>
+                          <h3 className="text-white font-bold text-lg">{premio.title}</h3>
                           <p className="text-slate-200 text-xs">{premio.desc}</p>
                         </div>
                       </div>
@@ -247,11 +244,7 @@ export default function Home() {
                     <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nome Completo</label><input type="text" placeholder="Seu nome" disabled={usuarioIdentificado} className={`w-full h-11 px-4 rounded-lg border outline-none transition-all text-sm ${usuarioIdentificado ? 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' : 'bg-white border-slate-200 focus:border-blue-500'}`} value={nome} onChange={(e) => setNome(e.target.value)} /></div>
                     <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">WhatsApp</label><input type="tel" placeholder="(11) 99999-9999" disabled={usuarioIdentificado} className={`w-full h-11 px-4 rounded-lg border outline-none transition-all text-sm ${usuarioIdentificado ? 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' : 'bg-white border-slate-200 focus:border-blue-500'}`} value={whatsapp} onChange={handleWhatsappChange} /></div>
                   </div>
-                  {usuarioIdentificado ? (
-                    <button onClick={() => setEtapa(2)} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 shadow-md">Continuar como {nome.split(' ')[0]} <ArrowRight size={16} /></button>
-                  ) : (
-                    <button disabled={!nome || whatsapp.length < 15} onClick={() => { localStorage.setItem("rifa_user_zap", whatsapp); localStorage.setItem("rifa_user_nome", nome); setUsuarioIdentificado(true); setEtapa(2); }} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 mt-2 shadow-md disabled:opacity-50">Continuar <ArrowRight size={16} /></button>
-                  )}
+                  <button disabled={!nome || whatsapp.length < 14} onClick={() => { localStorage.setItem("rifa_user_zap", whatsapp); localStorage.setItem("rifa_user_nome", nome); setUsuarioIdentificado(true); setEtapa(2); }} className="w-full h-12 bg-blue-600 disabled:opacity-50 hover:bg-blue-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 shadow-md">Continuar <ArrowRight size={16} /></button>
                 </div>
               </div>
             )}
@@ -269,22 +262,36 @@ export default function Home() {
                   <button onClick={() => setLote((l) => Math.min(9, l + 1))} className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-md transition-all"><ChevronRight size={20} /></button>
                 </div>
 
-                <div className="flex-1 p-2 overflow-y-auto bg-slate-50/30"><div className="grid grid-cols-10 gap-1 w-full max-w-[380px] mx-auto">{numerosLote.map((n: NumeroRifa) => (<button key={n.numero} disabled={n.status !== "disponivel"} onClick={() => toggleNumero(n.numero, n.status)} className={`aspect-square flex items-center justify-center rounded-[4px] text-[10px] font-bold transition-all border shadow-sm ${n.status === "pago" ? "bg-red-500 text-white border-red-600 opacity-90 cursor-not-allowed" : ""} ${n.status === "reservado" ? "bg-amber-300 text-amber-900 border-amber-400 cursor-not-allowed" : ""} ${n.status === "disponivel" && !selecionados.includes(n.numero) ? "bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600" : ""} ${selecionados.includes(n.numero) ? "bg-blue-600 text-white border-blue-600 scale-105 z-10 shadow-md" : ""}`}>{formatarNumero(n.numero)}</button>))}</div></div>
+                {/* GRID COM ESTILO ORIGINAL (Sombra, Espaçamento, Botões Maiores) */}
+                <div className="flex-1 p-2 overflow-y-auto bg-slate-50/30">
+                  <div className="grid grid-cols-10 gap-1 w-full max-w-[380px] mx-auto">
+                    {numerosLote.map((n: NumeroRifa) => (
+                      <button 
+                        key={n.numero} 
+                        disabled={n.status !== "disponivel"} 
+                        onClick={() => toggleNumero(n.numero, n.status)} 
+                        className={`aspect-square flex items-center justify-center rounded-[4px] text-[10px] font-bold transition-all border shadow-sm 
+                        ${n.status === "pago" ? "bg-red-500 text-white border-red-600 opacity-90 cursor-not-allowed" : ""} 
+                        ${n.status === "reservado" ? "bg-amber-300 text-amber-900 border-amber-400 cursor-not-allowed" : ""} 
+                        ${n.status === "disponivel" && !selecionados.includes(n.numero) ? "bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600" : ""} 
+                        ${selecionados.includes(n.numero) ? "bg-blue-600 text-white border-blue-600 scale-105 z-10 shadow-md" : ""}`}
+                      >
+                        {formatarNumero(n.numero)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 
                 <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20 space-y-3">
-                  {selecionados.length > 0 ? (<button onClick={() => setEtapa(3)} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center justify-between px-5 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all"><span className="text-xs font-medium text-blue-100 uppercase tracking-wide">{selecionados.length} selecionado(s)</span><span className="text-base">Concluir R$ {(selecionados.length * 5).toFixed(2)}</span></button>) : (<div className="w-full text-center text-slate-400 text-xs font-bold uppercase tracking-wide py-3 bg-slate-50 rounded-lg border border-slate-200 border-dashed">Selecione seus números</div>)}
+                  {selecionados.length > 0 ? (
+                    <button onClick={finalizarCompra} className="w-full h-14 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold flex items-center justify-between px-6 animate-in slide-in-from-bottom-2 shadow-lg shadow-green-100 transition-all transform hover:scale-[1.02]">
+                      <div className="flex flex-col items-start"><span className="text-[10px] font-bold text-green-100 uppercase tracking-wide">Total a Pagar</span><span className="text-xl leading-none">R$ {(selecionados.length * 5).toFixed(2)}</span></div>
+                      <div className="flex items-center gap-2 text-sm uppercase tracking-wide">Pagar Agora <ArrowRight size={18} strokeWidth={3} /></div>
+                    </button>
+                  ) : (
+                    <div className="w-full text-center text-slate-400 text-xs font-bold uppercase tracking-wide py-3 bg-slate-50 rounded-lg border border-slate-200 border-dashed">Selecione seus números</div>
+                  )}
                   <button onClick={voltarParaCadastro} className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-1"><ChevronLeft size={14} /> Voltar e corrigir meus dados</button>
-                </div>
-              </div>
-            )}
-
-            {etapa === 3 && (
-              <div className="flex flex-col animate-in fade-in duration-300 p-6">
-                <div className="text-center mb-6"><h1 className="text-lg font-bold text-slate-900">Confirme o pedido</h1><p className="text-xs text-slate-500 mt-1">Verifique seus números antes de enviar</p></div>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 flex flex-col items-center"><div className="flex flex-wrap justify-center gap-1.5 mb-4 max-h-[120px] overflow-y-auto w-full">{selecionados.map((n) => <span key={n} className="px-2 py-1 bg-white border border-slate-200 rounded text-xs font-bold text-slate-600 shadow-sm">#{formatarNumero(n)}</span>)}</div><div className="pt-4 border-t border-slate-200 w-full text-center"><span className="text-xs text-slate-400 uppercase font-bold tracking-wider">Total a Pagar</span><div className="text-3xl font-black text-blue-600 mt-1">R$ {(selecionados.length * 5).toFixed(2)}</div></div></div>
-                <div className="space-y-3">
-                  <button onClick={finalizarCompra} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold flex items-center justify-center gap-2 shadow-md shadow-blue-100 transition-all text-sm"><Check size={18}/> Confirmar e Ir para Pagamento</button>
-                  <button onClick={() => setEtapa(2)} className="w-full py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">Voltar e alterar</button>
                 </div>
               </div>
             )}
