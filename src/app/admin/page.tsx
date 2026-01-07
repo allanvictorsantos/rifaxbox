@@ -150,7 +150,7 @@ export default function AdminPage() {
     const valorFormatado = pedido.total.toFixed(2);
     const numerosFormatados = pedido.numeros.join(", ");
     const nomeCliente = pedido.cliente_nome || "Cliente";
-    const msg = `✅ *PAGAMENTO CONFIRMADO!*\n\nOlá ${nomeCliente}, conferi aqui e está tudo certo!\n\n🎟 *Seus Números:* ${numerosFormatados}\n💰 *Valor:* R$ ${valorFormatado}\n\nBoa sorte! 🍀`;
+    const msg = ` *PAGAMENTO CONFIRMADO!*\n\nOlá ${nomeCliente}, conferi aqui e está tudo certo!\n\n *Seus Números:* ${numerosFormatados}\n *Valor:* R$ ${valorFormatado}\n\nBoa sorte! `;
     if (pedido.cliente_whatsapp) {
       window.open(`https://wa.me/55${pedido.cliente_whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
     }
