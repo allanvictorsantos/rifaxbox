@@ -132,7 +132,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ESTILO DO CONTAINER ORIGINAL (Mais largo, mais arredondado, sombra maior) */}
+      {/* ESTILO DO CONTAINER (Largo, Sombra Suave) */}
       <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden relative flex flex-col h-auto max-h-[98vh] transition-all duration-300">
         
         {/* HEADER */}
@@ -284,8 +284,9 @@ export default function Home() {
                 
                 <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20 space-y-3">
                   {selecionados.length > 0 ? (
-                    <button onClick={finalizarCompra} className="w-full h-14 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold flex items-center justify-between px-6 animate-in slide-in-from-bottom-2 shadow-lg shadow-green-100 transition-all transform hover:scale-[1.02]">
-                      <div className="flex flex-col items-start"><span className="text-[10px] font-bold text-green-100 uppercase tracking-wide">Total a Pagar</span><span className="text-xl leading-none">R$ {(selecionados.length * 5).toFixed(2)}</span></div>
+                    // BOTÃO RESTAURADO: AZUL (bg-blue-600) + LÓGICA NOVA (finalizarCompra direto)
+                    <button onClick={finalizarCompra} className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-between px-6 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all transform hover:scale-[1.02]">
+                      <div className="flex flex-col items-start"><span className="text-[10px] font-bold text-blue-100 uppercase tracking-wide">Total a Pagar</span><span className="text-xl leading-none">R$ {(selecionados.length * 5).toFixed(2)}</span></div>
                       <div className="flex items-center gap-2 text-sm uppercase tracking-wide">Pagar Agora <ArrowRight size={18} strokeWidth={3} /></div>
                     </button>
                   ) : (
