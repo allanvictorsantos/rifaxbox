@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRifa } from "@/hooks/useRifa";
-import { ChevronLeft, ChevronRight, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send, ShieldAlert, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
 interface NumeroRifa {
@@ -22,6 +22,9 @@ export default function Home() {
   const [usuarioIdentificado, setUsuarioIdentificado] = useState(false);
   const [mostrarAjuda, setMostrarAjuda] = useState(false);
   const [imagemAtual, setImagemAtual] = useState(0);
+  
+  // Estado para abrir/fechar os detalhes de transparência
+  const [mostrarDetalhes, setMostrarDetalhes] = useState(false);
 
   // --- CONFIGURAÇÕES ---
   const CHAVE_PIX = "11981102244"; 
@@ -30,11 +33,26 @@ export default function Home() {
   const NUMERO_GANHADOR: number | null = null; 
   const LINK_VIDEO_RESULTADO = "https://youtube.com"; 
 
+  // --- LISTA DE PRÊMIOS ATUALIZADA ---
   const premios = [
-    { url: "https://placehold.co/800x500/107c10/FFF.png?text=FOTO+DO+XBOX+ONE+X", title: "Xbox One X 1TB", desc: "4K Nativo", badge: "Principal" },
-    { url: "https://placehold.co/800x500/333333/FFF.png?text=FOTO+DOS+2+CONTROLES", title: "2 Controles", desc: "Originais", badge: "Acessório" },
-    { url: "https://placehold.co/800x500/555555/FFF.png?text=FOTO+DOS+3+JOGOS", title: "3 Jogos", desc: "Mídia Física", badge: "Bônus" },
-    { url: "https://placehold.co/800x500/777777/FFF.png?text=FOTO+CARREGADOR", title: "Kit Energia", desc: "Carregador + Pilhas", badge: "Extra" }
+    { 
+      url: "/console.png", 
+      title: "Xbox One X 1TB", 
+      desc: "Inclui Fonte + Cabo HDMI", // Atualizado
+      badge: "Prêmio Principal" 
+    },
+    { 
+      url: "/controles.png", 
+      title: "2 Controles Originais", 
+      desc: "Inclui Carregador Duracell", // Atualizado
+      badge: "Acessório" 
+    },
+    { 
+      url: "/jogos.png", 
+      title: "3 Jogos Físicos", 
+      desc: "Discos bem conservados", 
+      badge: "Bônus" 
+    }
   ];
 
   const formatarNumero = (n: number) => n.toString().padStart(3, '0');
@@ -132,7 +150,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ESTILO DO CONTAINER (Largo, Sombra Suave) */}
       <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden relative flex flex-col h-auto max-h-[98vh] transition-all duration-300">
         
         {/* HEADER */}
@@ -141,7 +158,7 @@ export default function Home() {
           {whatsapp.length >= 14 && (<button onClick={() => setVendoMeusPedidos(!vendoMeusPedidos)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all border ${vendoMeusPedidos ? "bg-slate-100 text-slate-600 border-slate-200" : "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100"}`}>{vendoMeusPedidos ? <X size={14} /> : <Ticket size={14} />}{vendoMeusPedidos ? "Fechar" : "Meus Bilhetes"}</button>)}
         </div>
 
-        {/* --- TELA PAGAMENTO (ESTILO NOVO COM ALERTA VERMELHO) --- */}
+        {/* --- TELA PAGAMENTO --- */}
         {vendoMeusPedidos ? (
           <div className="flex-1 p-6 animate-in fade-in slide-in-from-bottom-4 bg-slate-50/50 overflow-y-auto">
             
@@ -219,8 +236,14 @@ export default function Home() {
                   <div className="flex transition-transform duration-500 ease-out h-full" style={{ transform: `translateX(-${imagemAtual * 100}%)` }}>
                     {premios.map((premio, idx) => (
                       <div key={idx} className="min-w-full h-full relative flex items-center justify-center bg-white">
-                        <img src={premio.url} alt={premio.title} className="w-full h-full object-cover" />
+                        <img src={premio.url} alt={premio.title} className="w-full h-full object-contain p-4" />
                         <div className="absolute top-3 right-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg uppercase tracking-wider">{premio.badge}</div>
+                        
+                        {/* AVISO DE IMAGEM ILUSTRATIVA */}
+                        <div className="absolute bottom-16 w-full text-center">
+                          <span className="bg-black/50 text-white/90 text-[8px] px-2 py-0.5 rounded uppercase font-bold tracking-widest backdrop-blur-sm">Imagens Ilustrativas</span>
+                        </div>
+
                         <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4 pt-10">
                           <h3 className="text-white font-bold text-lg">{premio.title}</h3>
                           <p className="text-slate-200 text-xs">{premio.desc}</p>
@@ -228,11 +251,29 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                  <button onClick={() => setImagemAtual((i) => (i === 0 ? premios.length - 1 : i - 1))} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-1.5 rounded-full shadow-sm hover:bg-white transition-all"><ChevronLeft size={20}/></button>
-                  <button onClick={() => setImagemAtual((i) => (i === premios.length - 1 ? 0 : i + 1))} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-1.5 rounded-full shadow-sm hover:bg-white transition-all"><ChevronRight size={20}/></button>
+                  <button onClick={() => setImagemAtual((i) => (i === 0 ? premios.length - 1 : i - 1))} className="absolute left-2 top-1/2 -translate-y-1/2 bg-slate-800/20 hover:bg-slate-800/50 text-white p-2 rounded-full transition-all"><ChevronLeft size={24}/></button>
+                  <button onClick={() => setImagemAtual((i) => (i === premios.length - 1 ? 0 : i + 1))} className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-800/20 hover:bg-slate-800/50 text-white p-2 rounded-full transition-all"><ChevronRight size={24}/></button>
                   <div className="absolute bottom-4 left-0 w-full flex justify-center gap-1.5 z-20">
                     {premios.map((_, idx) => (<div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all ${idx === imagemAtual ? 'bg-white scale-125' : 'bg-white/40'}`} />))}
                   </div>
+                </div>
+
+                {/* --- SEÇÃO DE TRANSPARÊNCIA (NOVO!) --- */}
+                <div className="px-6 pt-4">
+                  <button onClick={() => setMostrarDetalhes(!mostrarDetalhes)} className="w-full flex items-center justify-between text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 p-3 rounded-lg transition-all border border-slate-200">
+                    <span className="flex items-center gap-2"><AlertCircle size={16} /> Ver condições reais de uso (Transparência)</span>
+                    {mostrarDetalhes ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                  </button>
+                  
+                  {mostrarDetalhes && (
+                    <div className="mt-2 p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600 space-y-2 animate-in slide-in-from-top-2">
+                      <p><strong>🕹️ Console (8 Anos):</strong> Bem conservado. Recomenda-se limpeza interna e troca de pasta térmica pelo tempo de uso. Acompanha fonte e cabo HDMI.</p>
+                      <p><strong>🎮 Controle Preto:</strong> Original. O botão LT (mira) tem retorno um pouco lento, mas funciona. Desgaste natural nos analógicos.</p>
+                      <p><strong>🎮 Controle Branco:</strong> Original. Desgaste estético na parte inferior direita (apoio) e nos analógicos.</p>
+                      <p><strong>🔋 Extra:</strong> Acompanha carregador de pilhas Duracell.</p>
+                      <p><strong>💿 Jogos:</strong> Mídia física em ótimo estado de conservação.</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-6 space-y-5">
@@ -262,7 +303,7 @@ export default function Home() {
                   <button onClick={() => setLote((l) => Math.min(9, l + 1))} className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-md transition-all"><ChevronRight size={20} /></button>
                 </div>
 
-                {/* GRID COM ESTILO ORIGINAL (Sombra, Espaçamento, Botões Maiores) */}
+                {/* GRID COM ESTILO ORIGINAL */}
                 <div className="flex-1 p-2 overflow-y-auto bg-slate-50/30">
                   <div className="grid grid-cols-10 gap-1 w-full max-w-[380px] mx-auto">
                     {numerosLote.map((n: NumeroRifa) => (
@@ -284,7 +325,7 @@ export default function Home() {
                 
                 <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20 space-y-3">
                   {selecionados.length > 0 ? (
-                    // BOTÃO RESTAURADO: AZUL (bg-blue-600) + LÓGICA NOVA (finalizarCompra direto)
+                    // BOTÃO AZUL COM ESTILO ANTIGO (RESTAURADO)
                     <button onClick={finalizarCompra} className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-between px-6 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all transform hover:scale-[1.02]">
                       <div className="flex flex-col items-start"><span className="text-[10px] font-bold text-blue-100 uppercase tracking-wide">Total a Pagar</span><span className="text-xl leading-none">R$ {(selecionados.length * 5).toFixed(2)}</span></div>
                       <div className="flex items-center gap-2 text-sm uppercase tracking-wide">Pagar Agora <ArrowRight size={18} strokeWidth={3} /></div>
