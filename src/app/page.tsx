@@ -27,24 +27,27 @@ export default function Home() {
   const [mostrarDetalhes, setMostrarDetalhes] = useState(false);
 
   // --- CONFIGURAÇÕES ---
-  const CHAVE_PIX = "11981102244"; 
+  const CHAVE_PIX = "11981102244"; // PIX DO SEU PAI
   const CHAVE_PIX_FORMATADA = "(11) 98110-2244";
+  
+  const WHATSAPP_SUPORTE = "5511964525170"; // SEU NÚMERO (Para receber comprovante)
+
   const DATA_SORTEIO = "28/03/2026"; 
   const NUMERO_GANHADOR: number | null = null; 
   const LINK_VIDEO_RESULTADO = "https://youtube.com"; 
 
-  // --- LISTA DE PRÊMIOS ATUALIZADA ---
+  // --- LISTA DE PRÊMIOS ---
   const premios = [
     { 
       url: "/console.png", 
       title: "Xbox One X 1TB", 
-      desc: "Inclui Fonte + Cabo HDMI", // Atualizado
+      desc: "Inclui Fonte + Cabo HDMI", 
       badge: "Prêmio Principal" 
     },
     { 
       url: "/controles.png", 
       title: "2 Controles Originais", 
-      desc: "Inclui Carregador Duracell", // Atualizado
+      desc: "Inclui Carregador Duracell", 
       badge: "Acessório" 
     },
     { 
@@ -126,7 +129,9 @@ export default function Home() {
     const total = (pendentes.length * 5).toFixed(2);
     const primeiroNome = nome.split(' ')[0];
     const msg = `*COMPROVANTE DE RIFA*\n\n*Nome:* ${primeiroNome}\n*Numeros:* ${listaNumeros}\n*Total:* R$ ${total}\n\nSegue o comprovante do PIX abaixo:`;
-    window.open(`https://wa.me/5511981102244?text=${encodeURIComponent(msg)}`, "_blank");
+    
+    // MUDANÇA AQUI: Agora manda para o SEU número (WHATSAPP_SUPORTE)
+    window.open(`https://wa.me/${WHATSAPP_SUPORTE}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" /></div>;
@@ -258,7 +263,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* --- SEÇÃO DE TRANSPARÊNCIA (NOVO!) --- */}
+                {/* --- SEÇÃO DE TRANSPARÊNCIA --- */}
                 <div className="px-6 pt-4">
                   <button onClick={() => setMostrarDetalhes(!mostrarDetalhes)} className="w-full flex items-center justify-between text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 p-3 rounded-lg transition-all border border-slate-200">
                     <span className="flex items-center gap-2"><AlertCircle size={16} /> Ver condições reais de uso (Transparência)</span>
@@ -325,7 +330,7 @@ export default function Home() {
                 
                 <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20 space-y-3">
                   {selecionados.length > 0 ? (
-                    // BOTÃO AZUL COM ESTILO ANTIGO (RESTAURADO)
+                    // BOTÃO AZUL COM ESTILO ANTIGO
                     <button onClick={finalizarCompra} className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-between px-6 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all transform hover:scale-[1.02]">
                       <div className="flex flex-col items-start"><span className="text-[10px] font-bold text-blue-100 uppercase tracking-wide">Total a Pagar</span><span className="text-xl leading-none">R$ {(selecionados.length * 5).toFixed(2)}</span></div>
                       <div className="flex items-center gap-2 text-sm uppercase tracking-wide">Pagar Agora <ArrowRight size={18} strokeWidth={3} /></div>
