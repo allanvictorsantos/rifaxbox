@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRifa } from "@/hooks/useRifa";
-import { ChevronLeft, ChevronRight, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, ArrowRight, Clock, Ticket, X, Copy, Trophy, PlayCircle, Info, Send, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, AlertCircle, Hand, MousePointerClick } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
 interface NumeroRifa {
@@ -23,14 +23,12 @@ export default function Home() {
   const [mostrarAjuda, setMostrarAjuda] = useState(false);
   const [imagemAtual, setImagemAtual] = useState(0);
   
-  // Estado para abrir/fechar os detalhes de transparência
   const [mostrarDetalhes, setMostrarDetalhes] = useState(false);
 
   // --- CONFIGURAÇÕES ---
-  const CHAVE_PIX = "11981102244"; // PIX DO SEU PAI
+  const CHAVE_PIX = "11981102244"; 
   const CHAVE_PIX_FORMATADA = "(11) 98110-2244";
-  
-  const WHATSAPP_SUPORTE = "5511964525170"; // SEU NÚMERO (Para receber comprovante)
+  const WHATSAPP_SUPORTE = "5511964525170"; 
 
   const DATA_SORTEIO = "28/03/2026"; 
   const NUMERO_GANHADOR: number | null = null; 
@@ -38,24 +36,9 @@ export default function Home() {
 
   // --- LISTA DE PRÊMIOS ---
   const premios = [
-    { 
-      url: "/console.png", 
-      title: "Xbox One X 1TB", 
-      desc: "Inclui Fonte + Cabo HDMI", 
-      badge: "Prêmio Principal" 
-    },
-    { 
-      url: "/controles.png", 
-      title: "2 Controles Originais", 
-      desc: "Inclui Carregador Duracell", 
-      badge: "Acessório" 
-    },
-    { 
-      url: "/jogos.png", 
-      title: "3 Jogos Físicos", 
-      desc: "Discos bem conservados", 
-      badge: "Bônus" 
-    }
+    { url: "/console.jpeg", title: "Xbox One X 1TB", desc: "Inclui Fonte + Cabo HDMI", badge: "Prêmio Principal" },
+    { url: "/controles.jpeg", title: "2 Controles Originais", desc: "Inclui Carregador Duracell", badge: "Acessório" },
+    { url: "/jogos.png", title: "3 Jogos Físicos", desc: "Discos bem conservados", badge: "Bônus" }
   ];
 
   const formatarNumero = (n: number) => n.toString().padStart(3, '0');
@@ -81,11 +64,12 @@ export default function Home() {
     return numeros.slice(inicio, inicio + 100);
   }, [numeros, lote]);
 
-  const textoPaginacao = useMemo(() => {
-    const inicio = lote * 100;
+  // Função auxiliar para mostrar o intervalo nos botões (ex: "100-199")
+  const getIntervaloTexto = (loteIndex: number) => {
+    const inicio = loteIndex * 100;
     const fim = inicio + 99;
-    return `${formatarNumero(inicio)} a ${formatarNumero(fim)}`;
-  }, [lote]);
+    return `${formatarNumero(inicio)}-${formatarNumero(fim)}`;
+  };
 
   const toggleNumero = (num: number, status: string) => {
     if (status !== "disponivel") return;
@@ -129,8 +113,6 @@ export default function Home() {
     const total = (pendentes.length * 5).toFixed(2);
     const primeiroNome = nome.split(' ')[0];
     const msg = `*COMPROVANTE DE RIFA*\n\n*Nome:* ${primeiroNome}\n*Numeros:* ${listaNumeros}\n*Total:* R$ ${total}\n\nSegue o comprovante do PIX abaixo:`;
-    
-    // MUDANÇA AQUI: Agora manda para o SEU número (WHATSAPP_SUPORTE)
     window.open(`https://wa.me/${WHATSAPP_SUPORTE}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
@@ -177,8 +159,6 @@ export default function Home() {
             {/* SE TEM PENDÊNCIA */}
             {pendentes.length > 0 ? (
               <div className="bg-white p-4 rounded-xl border border-red-200 shadow-sm space-y-4">
-                
-                {/* ALERTA CRÍTICO */}
                 <div className="flex flex-col gap-2 p-3 bg-red-50 rounded-lg border border-red-200 text-red-800">
                   <div className="flex items-center gap-2">
                     <AlertTriangle size={20} className="shrink-0 text-red-600" />
@@ -189,7 +169,6 @@ export default function Home() {
                   </p>
                 </div>
 
-                {/* PIX E BOTÃO JUNTOS */}
                 <div className="space-y-3">
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase ml-1">1. Copie o PIX</span>
@@ -244,7 +223,6 @@ export default function Home() {
                         <img src={premio.url} alt={premio.title} className="w-full h-full object-contain p-4" />
                         <div className="absolute top-3 right-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg uppercase tracking-wider">{premio.badge}</div>
                         
-                        {/* AVISO DE IMAGEM ILUSTRATIVA */}
                         <div className="absolute bottom-16 w-full text-center">
                           <span className="bg-black/50 text-white/90 text-[8px] px-2 py-0.5 rounded uppercase font-bold tracking-widest backdrop-blur-sm">Imagens Ilustrativas</span>
                         </div>
@@ -263,7 +241,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* --- SEÇÃO DE TRANSPARÊNCIA --- */}
                 <div className="px-6 pt-4">
                   <button onClick={() => setMostrarDetalhes(!mostrarDetalhes)} className="w-full flex items-center justify-between text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 p-3 rounded-lg transition-all border border-slate-200">
                     <span className="flex items-center gap-2"><AlertCircle size={16} /> Ver condições reais de uso (Transparência)</span>
@@ -297,18 +274,48 @@ export default function Home() {
 
             {etapa === 2 && (
               <div className="flex flex-col h-full min-h-0 animate-in fade-in">
-                <div className="pt-3 pb-2 px-6 text-center shrink-0 relative">
-                  <h2 className="text-base font-bold text-slate-900 flex items-center justify-center gap-2">Escolha seus números <button onClick={() => setMostrarAjuda(true)} className="text-blue-600 hover:bg-blue-50 p-1 rounded-full transition-colors"><Info size={16} /></button></h2>
-                  <div className="flex justify-center gap-3 mt-2 text-[9px] font-bold uppercase tracking-wider text-slate-500"><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-white border border-slate-300 shadow-sm"></div>Livre</div><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-amber-300 border border-amber-400"></div>Reservado</div><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-red-500 border border-red-600"></div>Pago</div></div>
+                
+                {/* --- CABEÇALHO COMPACTO --- */}
+                <div className="py-2 px-4 text-center shrink-0 bg-slate-50/50 border-b border-slate-100">
+                  <h2 className="text-sm font-black text-slate-800 uppercase tracking-wide flex items-center justify-center gap-1.5">
+                    <Ticket size={16} className="text-blue-600"/> 1.000 NÚMEROS DISPONÍVEIS
+                  </h2>
+                  <div className="flex justify-center gap-3 mt-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500"><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-white border border-slate-300 shadow-sm"></div>Livre</div><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-amber-300 border border-amber-400"></div>Reservado</div><div className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-red-500 border border-red-600"></div>Pago</div></div>
                 </div>
                 
-                <div className="flex items-center justify-between px-4 py-1.5 border-b border-slate-50 shrink-0">
-                  <button onClick={() => setLote((l) => Math.max(0, l - 1))} className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-md transition-all"><ChevronLeft size={20} /></button>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{textoPaginacao}</span>
-                  <button onClick={() => setLote((l) => Math.min(9, l + 1))} className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-md transition-all"><ChevronRight size={20} /></button>
+                {/* --- NAVEGAÇÃO INTELIGENTE (MOSTRANDO INTERVALOS) --- */}
+                <div className="flex items-center justify-between px-4 py-2 bg-slate-100 border-b border-slate-200 shrink-0">
+                  <button 
+                    onClick={() => setLote((l) => Math.max(0, l - 1))} 
+                    disabled={lote === 0}
+                    className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg transition-all ${lote === 0 ? "opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300" : "bg-white border-slate-300 text-slate-700 hover:text-blue-600 hover:border-blue-300 shadow-sm"}`}
+                  >
+                    <ChevronLeft size={16} />
+                    <div className="text-left">
+                      <div className="text-[9px] font-bold uppercase opacity-60">Anterior</div>
+                      {lote > 0 && <div className="text-[10px] font-black">{getIntervaloTexto(lote - 1)}</div>}
+                    </div>
+                  </button>
+                  
+                  <div className="text-center">
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Página {lote + 1} de 10</span>
+                    <span className="text-[11px] font-black text-slate-800">{getIntervaloTexto(lote)}</span>
+                  </div>
+
+                  <button 
+                    onClick={() => setLote((l) => Math.min(9, l + 1))} 
+                    disabled={lote === 9}
+                    className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg transition-all ${lote === 9 ? "opacity-50 cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300" : "bg-white border-slate-300 text-slate-700 hover:text-blue-600 hover:border-blue-300 shadow-sm"}`}
+                  >
+                    <div className="text-right">
+                      <div className="text-[9px] font-bold uppercase opacity-60">Próxima</div>
+                      {lote < 9 && <div className="text-[10px] font-black">{getIntervaloTexto(lote + 1)}</div>}
+                    </div>
+                    <ChevronRight size={16} />
+                  </button>
                 </div>
 
-                {/* GRID COM ESTILO ORIGINAL */}
+                {/* GRID DE NÚMEROS */}
                 <div className="flex-1 p-2 overflow-y-auto bg-slate-50/30">
                   <div className="grid grid-cols-10 gap-1 w-full max-w-[380px] mx-auto">
                     {numerosLote.map((n: NumeroRifa) => (
@@ -330,13 +337,15 @@ export default function Home() {
                 
                 <div className="p-4 border-t border-slate-100 bg-white shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20 space-y-3">
                   {selecionados.length > 0 ? (
-                    // BOTÃO AZUL COM ESTILO ANTIGO
+                    // BOTÃO AZUL
                     <button onClick={finalizarCompra} className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-between px-6 animate-in slide-in-from-bottom-2 shadow-lg shadow-blue-100 transition-all transform hover:scale-[1.02]">
                       <div className="flex flex-col items-start"><span className="text-[10px] font-bold text-blue-100 uppercase tracking-wide">Total a Pagar</span><span className="text-xl leading-none">R$ {(selecionados.length * 5).toFixed(2)}</span></div>
                       <div className="flex items-center gap-2 text-sm uppercase tracking-wide">Pagar Agora <ArrowRight size={18} strokeWidth={3} /></div>
                     </button>
                   ) : (
-                    <div className="w-full text-center text-slate-400 text-xs font-bold uppercase tracking-wide py-3 bg-slate-50 rounded-lg border border-slate-200 border-dashed">Selecione seus números</div>
+                    <div className="w-full flex items-center justify-center gap-2 text-amber-800 text-xs font-bold uppercase tracking-wide py-3 bg-amber-50 rounded-lg border border-amber-200 border-dashed">
+                      <Ticket size={16}/> Dica: Você pode escolher vários!
+                    </div>
                   )}
                   <button onClick={voltarParaCadastro} className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center gap-1"><ChevronLeft size={14} /> Voltar e corrigir meus dados</button>
                 </div>
