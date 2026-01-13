@@ -147,27 +147,39 @@ export default function Home() {
     <main className="min-h-screen bg-slate-100 flex items-center justify-center p-2 font-sans antialiased overflow-y-auto">
       <Toaster position="top-center" richColors />
 
-      {/* --- TELA 1: ESCOLHA DO MODO (TEXTOS NOVOS) --- */}
+      {/* --- TELA 1: ESCOLHA DO MODO (ESTILO ORIGINAL + TEXTOS NOVOS) --- */}
       {modo === "inicio" && (
         <div className="w-full max-w-sm space-y-5 animate-in fade-in zoom-in-95 my-auto">
           <div className="bg-white p-6 rounded-2xl shadow-xl text-center border border-slate-200">
             <h1 className="text-2xl font-black text-slate-900 mb-2">Rifa Xbox One X</h1>
             <p className="text-sm text-slate-500 mb-8 font-medium">Como você quer participar?</p>
 
-            {/* BOTÃO VERDE - ATENDIMENTO HUMANO */}
-            <button onClick={() => setModo("tradicional")} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl p-5 mb-4 flex items-center gap-4 shadow-lg shadow-emerald-100 transition-all transform hover:scale-[1.02] active:scale-95 text-left group border border-emerald-400 relative overflow-hidden">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0"><User size={28} /></div>
+            {/* BOTÃO VERDE - ESTILO ORIGINAL */}
+            <button onClick={() => setModo("tradicional")} className="w-full bg-green-500 hover:bg-green-600 text-white rounded-2xl p-5 mb-4 flex items-center gap-4 shadow-lg shadow-green-200/50 transition-all transform hover:scale-[1.02] active:scale-95 text-left group relative overflow-hidden border border-green-400">
+              {/* Ícone de fundo */}
+              <div className="absolute right-0 top-0 opacity-10 -mr-4 -mt-4 transform rotate-12 pointer-events-none">
+                <MessageCircle size={100} />
+              </div>
+              {/* Ícone principal */}
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0 relative z-10">
+                <Smartphone size={28} />
+              </div>
+              {/* Texto */}
               <div className="relative z-10">
-                <span className="block font-black text-sm uppercase tracking-wide leading-tight">Prefiro atendimento humano</span>
-                <span className="text-xs text-emerald-100 font-medium">Me chame no Zap que eu anoto pra você.</span>
+                <span className="block font-black text-sm uppercase tracking-wide leading-tight">Prefiro que me ajudem</span>
+                <span className="text-xs text-green-50 font-medium">Me chame no Zap que eu anoto pra você.</span>
               </div>
             </button>
 
-            {/* BOTÃO BRANCO - FAZER SOZINHO */}
-            <button onClick={() => setModo("digital")} className="w-full bg-white border-2 border-slate-100 hover:border-blue-500 text-slate-600 hover:text-blue-600 rounded-2xl p-4 flex items-center gap-4 shadow-sm transition-all text-left group active:scale-95">
-              <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center shrink-0 group-hover:bg-blue-50 transition-colors"><Ticket size={24} className="text-slate-400 group-hover:text-blue-500" /></div>
+            {/* BOTÃO BRANCO - ESTILO ORIGINAL */}
+            <button onClick={() => setModo("digital")} className="w-full bg-white border-2 border-blue-100 hover:border-blue-500 text-slate-600 rounded-2xl p-4 flex items-center gap-4 shadow-sm transition-all text-left group active:scale-95">
+              {/* Ícone */}
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
+                <Globe size={24} className="text-blue-500" />
+              </div>
+              {/* Texto */}
               <div>
-                <span className="block font-bold text-sm uppercase leading-tight">Quero fazer sozinho</span>
+                <span className="block font-bold text-sm uppercase leading-tight text-blue-700 group-hover:text-blue-600 transition-colors">Quero fazer sozinho</span>
                 <span className="text-xs text-slate-400">Vou escolher e reservar por aqui.</span>
               </div>
             </button>
