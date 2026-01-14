@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useRifa } from "@/hooks/useRifa";
-import { ChevronLeft, ChevronRight, Check, Clock, Ticket, X, Copy, Info, Send, AlertTriangle, ChevronDown, ChevronUp, AlertCircle, MessageCircle, Globe, Smartphone, ArrowRight, Camera, User, Hand } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Clock, Ticket, X, Copy, Info, Send, AlertTriangle, ChevronDown, ChevronUp, AlertCircle, MessageCircle, Globe, Smartphone, ArrowRight, Camera, User, Eye, ScanEye, MousePointerClick, QrCode, FileText } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { toPng } from 'html-to-image';
 
@@ -16,7 +16,8 @@ export default function Home() {
   const { numeros, loading, reservarNumeros } = useRifa();
   const printRef = useRef<HTMLDivElement>(null);
   
-  const [modo, setModo] = useState<"inicio" | "digital" | "tradicional">("inicio");
+  const [modo, setModo] = useState<"inicio" | "digital" | "tradicional" | "tutorial-manual" | "tutorial-digital">("inicio");
+  
   const [selecionados, setSelecionados] = useState<number[]>([]);
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -50,6 +51,14 @@ export default function Home() {
     if (salvoZap) { setWhatsapp(salvoZap); setUsuarioIdentificado(true); }
     if (salvoNome) setNome(salvoNome);
   }, []);
+
+  // --- BLINDAGEM NUCLEAR ---
+  // Toda vez que a etapa mudar para 2 (Tabela), forçamos o fechamento da tela de bilhetes.
+  useEffect(() => {
+    if (etapa === 2) {
+      setVendoMeusPedidos(false);
+    }
+  }, [etapa]);
 
   const meusPedidosGeral = useMemo(() => {
     if (!whatsapp) return [];
@@ -96,7 +105,7 @@ export default function Home() {
       localStorage.setItem("rifa_user_nome", nomeFinal);
       setUsuarioIdentificado(true);
       setSelecionados([]);
-      setVendoMeusPedidos(true); 
+      setVendoMeusPedidos(true); // Aqui sim deve abrir a tela de bilhetes (checkout)
       toast.success("Reservado!");
     }
   };
@@ -116,19 +125,29 @@ export default function Home() {
   };
 
   const falarComDonoDireto = () => {
-    const msg = `Olá Allan! Vi a tabela da Rifa do Xbox e quero escolher meus números.`;
+    const msg = `Olá Allan! Vi a tabela no site e quero escolher meus números.`;
     window.open(`https://wa.me/${WHATSAPP_SUPORTE}?text=${encodeURIComponent(msg)}`, "_blank");
   }
+
+  // --- FUNÇÕES DE NAVEGAÇÃO SEGURA ---
+  const iniciarDigital = () => {
+    setModo("digital");
+    setEtapa(1); // Garante que começa no formulário
+    setVendoMeusPedidos(false); // Garante que a lista de bilhetes tá fechada
+  };
+
+  const irParaTabela = () => {
+    localStorage.setItem("rifa_user_zap", whatsapp);
+    localStorage.setItem("rifa_user_nome", nome);
+    setUsuarioIdentificado(true);
+    setVendoMeusPedidos(false); // Reforço de segurança
+    setEtapa(2); // O useEffect lá em cima vai garantir que a tela de bilhetes feche se o setVendoMeusPedidos falhar
+  };
 
   const tirarPrintTabela = useCallback(async () => {
     if (printRef.current) {
       try {
-        const dataUrl = await toPng(printRef.current, { 
-          cacheBust: true, 
-          backgroundColor: '#ffffff', 
-          pixelRatio: 2,
-          style: { boxShadow: 'none' } 
-        });
+        const dataUrl = await toPng(printRef.current, { cacheBust: true, backgroundColor: '#ffffff', pixelRatio: 2, style: { boxShadow: 'none' } });
         const link = document.createElement('a');
         link.download = `rifa-tabela-${lote + 1}.png`;
         link.href = dataUrl;
@@ -147,113 +166,132 @@ export default function Home() {
     <main className="min-h-screen bg-slate-100 flex items-center justify-center p-2 font-sans antialiased overflow-y-auto">
       <Toaster position="top-center" richColors />
 
-      {/* --- TELA 1: ESCOLHA DO MODO (ESTILO ORIGINAL + TEXTOS NOVOS) --- */}
+      {/* --- TELA 1: ESCOLHA DO MODO --- */}
       {modo === "inicio" && (
         <div className="w-full max-w-sm space-y-5 animate-in fade-in zoom-in-95 my-auto">
           <div className="bg-white p-6 rounded-2xl shadow-xl text-center border border-slate-200">
             <h1 className="text-2xl font-black text-slate-900 mb-2">Rifa Xbox One X</h1>
             <p className="text-sm text-slate-500 mb-8 font-medium">Como você quer participar?</p>
 
-            {/* BOTÃO VERDE - ESTILO ORIGINAL */}
-            <button onClick={() => setModo("tradicional")} className="w-full bg-green-500 hover:bg-green-600 text-white rounded-2xl p-5 mb-4 flex items-center gap-4 shadow-lg shadow-green-200/50 transition-all transform hover:scale-[1.02] active:scale-95 text-left group relative overflow-hidden border border-green-400">
-              {/* Ícone de fundo */}
-              <div className="absolute right-0 top-0 opacity-10 -mr-4 -mt-4 transform rotate-12 pointer-events-none">
-                <MessageCircle size={100} />
-              </div>
-              {/* Ícone principal */}
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0 relative z-10">
-                <Smartphone size={28} />
-              </div>
-              {/* Texto */}
+            {/* BOTÃO VERDE - Manda para Tutorial MANUAL */}
+            <button onClick={() => setModo("tutorial-manual")} className="w-full bg-green-500 hover:bg-green-600 text-white rounded-2xl p-5 mb-4 flex items-center gap-4 shadow-lg shadow-green-200/50 transition-all transform hover:scale-[1.02] active:scale-95 text-left group border border-green-400 relative overflow-hidden">
+              <div className="absolute right-0 top-0 opacity-10 -mr-4 -mt-4 transform rotate-12 pointer-events-none"><MessageCircle size={100} /></div>
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0 relative z-10"><Smartphone size={28} /></div>
               <div className="relative z-10">
                 <span className="block font-black text-sm uppercase tracking-wide leading-tight">Prefiro que me ajudem</span>
-                <span className="text-xs text-green-50 font-medium">Me chame no Zap que eu anoto pra você.</span>
+                <span className="text-xs text-green-100 font-medium">Eu falo os números e você anota.</span>
               </div>
             </button>
 
-            {/* BOTÃO BRANCO - ESTILO ORIGINAL */}
-            <button onClick={() => setModo("digital")} className="w-full bg-white border-2 border-blue-100 hover:border-blue-500 text-slate-600 rounded-2xl p-4 flex items-center gap-4 shadow-sm transition-all text-left group active:scale-95">
-              {/* Ícone */}
-              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                <Globe size={24} className="text-blue-500" />
-              </div>
-              {/* Texto */}
+            {/* BOTÃO BRANCO - Manda para Tutorial DIGITAL */}
+            <button onClick={() => setModo("tutorial-digital")} className="w-full bg-white border-2 border-blue-100 hover:border-blue-500 text-slate-600 hover:text-blue-600 rounded-2xl p-4 flex items-center gap-4 shadow-sm transition-all text-left group active:scale-95">
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors"><Globe size={24} className="text-blue-500" /></div>
               <div>
                 <span className="block font-bold text-sm uppercase leading-tight text-blue-700 group-hover:text-blue-600 transition-colors">Quero fazer sozinho</span>
                 <span className="text-xs text-slate-400">Vou escolher e reservar por aqui.</span>
               </div>
             </button>
           </div>
-          
           <div className="text-center opacity-60 hover:opacity-100 transition-opacity">
              <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Sorteio Confiável & Transparente</span>
           </div>
         </div>
       )}
 
-      {/* --- MODO TRADICIONAL (VITRINE) --- */}
+      {/* --- TELA 2A: TUTORIAL MANUAL (CARDÁPIO) --- */}
+      {modo === "tutorial-manual" && (
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-slate-100 p-8 text-center animate-in zoom-in-95 my-auto relative">
+          <button onClick={() => setModo("inicio")} className="absolute top-4 left-4 text-slate-400 hover:text-slate-600"><ChevronLeft size={24}/></button>
+          <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6"><ScanEye size={32} /></div>
+          <h2 className="text-xl font-black text-slate-900 mb-2">Como Funciona?</h2>
+          <p className="text-sm text-slate-500 mb-8">É bem simples, igual um cardápio:</p>
+          <div className="space-y-4 text-left mb-8">
+            <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-8 h-8 bg-white border border-slate-200 rounded flex items-center justify-center font-bold text-xs text-slate-400">000</div>
+              <div className="text-sm text-slate-600 font-medium">1. Procure um número <span className="text-green-600 font-bold">LIVRE (Branco)</span>.</div>
+            </div>
+            <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-8 h-8 bg-white border border-slate-200 rounded flex items-center justify-center"><Eye size={16} className="text-slate-600"/></div>
+              <div className="text-sm text-slate-600 font-medium">2. <span className="font-bold">Decore ou anote</span> o número.</div>
+            </div>
+            <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center"><Smartphone size={16} className="text-green-600"/></div>
+              <div className="text-sm text-slate-600 font-medium">3. Toque no botão para <span className="font-bold text-green-600">chamar no WhatsApp</span>.</div>
+            </div>
+          </div>
+          <button onClick={() => setModo("tradicional")} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm uppercase tracking-wide shadow-lg shadow-green-200">Entendi, Ver Tabela</button>
+        </div>
+      )}
+
+      {/* --- TELA 2B: TUTORIAL DIGITAL (CORRIGIDO) --- */}
+      {modo === "tutorial-digital" && (
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-slate-100 p-8 text-center animate-in zoom-in-95 my-auto relative">
+          <button onClick={() => setModo("inicio")} className="absolute top-4 left-4 text-slate-400 hover:text-slate-600"><ChevronLeft size={24}/></button>
+          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6"><Ticket size={32} /></div>
+          <h2 className="text-xl font-black text-slate-900 mb-2">Compra Automática</h2>
+          <p className="text-sm text-slate-500 mb-8">Siga os 3 passos para garantir sua chance:</p>
+          <div className="space-y-4 text-left mb-8">
+            <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center"><FileText size={16} className="text-blue-600"/></div>
+              <div className="text-sm text-slate-600 font-medium">1. Preencha seu <span className="font-bold text-blue-600">Nome e WhatsApp</span>.</div>
+            </div>
+            <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center"><MousePointerClick size={16} className="text-blue-600"/></div>
+              <div className="text-sm text-slate-600 font-medium">2. Escolha os números e clique em <span className="font-bold">Pagar Agora</span>.</div>
+            </div>
+            <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center"><Send size={16} className="text-green-600"/></div>
+              <div className="text-sm text-slate-600 font-medium">3. Copie o PIX e <span className="text-red-600 font-bold">envie o comprovante</span>.</div>
+            </div>
+          </div>
+          <button onClick={iniciarDigital} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm uppercase tracking-wide shadow-lg shadow-blue-200">Começar Agora</button>
+        </div>
+      )}
+
+      {/* --- TELA 3: TABELA LIMPA (VITRINE / MANUAL) --- */}
       {modo === "tradicional" && (
         <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden relative flex flex-col h-auto min-h-[80vh]">
-          
           {/* Cabeçalho */}
           <div className="bg-slate-900 text-white p-4 flex items-center justify-between shrink-0 sticky top-0 z-50">
-            <button onClick={() => setModo("inicio")} className="text-white/70 hover:text-white flex items-center gap-1 text-xs font-bold uppercase"><ChevronLeft size={16}/> Voltar</button>
+            <button onClick={() => setModo("tutorial-manual")} className="text-white/70 hover:text-white flex items-center gap-1 text-xs font-bold uppercase"><ChevronLeft size={16}/> Voltar</button>
             <h2 className="font-bold text-sm uppercase tracking-wider">Tabela de Números</h2>
-            <button onClick={tirarPrintTabela} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition-colors flex flex-col items-center justify-center" title="Salvar imagem da tabela">
-              <Camera size={20} />
-            </button>
+            <button onClick={tirarPrintTabela} className="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition-colors flex flex-col items-center justify-center" title="Salvar imagem da tabela"><Camera size={20} /></button>
           </div>
-
           {/* ÁREA DE CONTEÚDO (REF DO PRINT) */}
-          <div className="bg-white flex flex-col pb-24" ref={printRef}>
+          <div className="bg-white flex flex-col pb-28" ref={printRef}>
              <div className="flex items-center justify-between px-4 py-4 bg-white border-b border-slate-100 shrink-0" data-html2canvas-ignore>
                 <button onClick={() => setLote((l) => Math.max(0, l - 1))} disabled={lote === 0} className="p-2 bg-slate-100 rounded-lg disabled:opacity-30 border border-slate-200 text-slate-700 hover:bg-slate-200 transition-all"><ChevronLeft size={24}/></button>
-                <div className="text-center">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Página {lote + 1} de 10</span>
-                  <span className="text-lg font-black text-slate-800">{textoPaginacao}</span>
-                </div>
+                <div className="text-center"><span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Página {lote + 1} de 10</span><span className="text-lg font-black text-slate-800">{textoPaginacao}</span></div>
                 <button onClick={() => setLote((l) => Math.min(9, l + 1))} disabled={lote === 9} className="p-2 bg-slate-100 rounded-lg disabled:opacity-30 border border-slate-200 text-slate-700 hover:bg-slate-200 transition-all"><ChevronRight size={24}/></button>
               </div>
-
-              {/* LEGENDA NO TOPO */}
-              <div className="px-4 pt-2 pb-4 text-center bg-white">
-                 <div className="flex justify-center gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="px-6 pb-6 pt-4 bg-white">
+                <div className="grid grid-cols-10 gap-1.5 mx-auto">
+                  {numerosLote.map((n: NumeroRifa) => (
+                    <div key={n.numero} className="aspect-square flex items-center justify-center rounded-[4px] text-[11px] font-black border"
+                      style={{
+                        backgroundColor: n.status === 'pago' ? '#dc2626' : n.status === 'reservado' ? '#fcd34d' : '#ffffff',
+                        borderColor: n.status === 'pago' ? '#b91c1c' : n.status === 'reservado' ? '#f59e0b' : '#cbd5e1',
+                        color: n.status === 'pago' ? '#ffffff' : n.status === 'reservado' ? '#0f172a' : '#64748b'
+                      }}>{formatarNumero(n.numero)}</div>
+                  ))}
+                </div>
+                <div className="flex justify-center gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-6">
                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded" style={{background: '#ffffff', border: '1px solid #cbd5e1'}}></div>Livre</div>
                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded" style={{background: '#fcd34d', border: '1px solid #f59e0b'}}></div>Reservado</div>
                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded" style={{background: '#dc2626', border: '1px solid #b91c1c'}}></div>Indisponível</div>
                  </div>
               </div>
-
-              {/* A Grade - ESTILOS INLINE (FIX DO ERRO LAB) */}
-              <div className="px-6 pb-6 bg-white">
-                <div className="grid grid-cols-10 gap-1.5 mx-auto">
-                  {numerosLote.map((n: NumeroRifa) => (
-                    <div 
-                      key={n.numero} 
-                      className="aspect-square flex items-center justify-center rounded-[4px] text-[11px] font-black border"
-                      style={{
-                        backgroundColor: n.status === 'pago' ? '#dc2626' : n.status === 'reservado' ? '#fcd34d' : '#ffffff',
-                        borderColor: n.status === 'pago' ? '#b91c1c' : n.status === 'reservado' ? '#f59e0b' : '#cbd5e1',
-                        color: n.status === 'pago' ? '#ffffff' : n.status === 'reservado' ? '#0f172a' : '#64748b'
-                      }}
-                    >
-                      {formatarNumero(n.numero)}
-                    </div>
-                  ))}
-                </div>
-              </div>
           </div>
-
           {/* Botão Flutuante do Zap */}
           <div className="p-4 bg-white border-t border-slate-200 shadow-[0_-5px_20px_rgba(0,0,0,0.1)] fixed bottom-0 left-0 right-0 z-50 md:absolute md:w-full">
             <button onClick={falarComDonoDireto} className="w-full h-14 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-green-100 uppercase tracking-wide animate-pulse">
-              <MessageCircle size={24} /> Já escolhi! Chamar no WhatsApp
+              <MessageCircle size={24} /> JÁ ESCOLHI! ABRIR ZAP E FALAR
             </button>
           </div>
         </div>
       )}
 
-      {/* --- MODO DIGITAL (AUTOMÁTICO) - ESTILO UNIFICADO --- */}
+      {/* --- MODO DIGITAL (AUTOMÁTICO) --- */}
       {modo === "digital" && (
         <div className="w-full max-w-[450px] bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden relative flex flex-col h-auto max-h-[98vh] transition-all duration-300 animate-in slide-in-from-right">
           <div className="pt-5 pb-3 px-6 border-b border-slate-50 flex items-center justify-between bg-white z-20 shrink-0">
@@ -344,7 +382,7 @@ export default function Home() {
                       <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nome Completo</label><input type="text" placeholder="Seu nome" disabled={usuarioIdentificado} className={`w-full h-11 px-4 rounded-lg border outline-none transition-all text-sm ${usuarioIdentificado ? 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' : 'bg-white border-slate-200 focus:border-blue-500'}`} value={nome} onChange={(e) => setNome(e.target.value)} /></div>
                       <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">WhatsApp</label><input type="tel" placeholder="(11) 99999-9999" disabled={usuarioIdentificado} className={`w-full h-11 px-4 rounded-lg border outline-none transition-all text-sm ${usuarioIdentificado ? 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' : 'bg-white border-slate-200 focus:border-blue-500'}`} value={whatsapp} onChange={handleWhatsappChange} /></div>
                     </div>
-                    <button disabled={!nome || whatsapp.length < 14} onClick={() => { localStorage.setItem("rifa_user_zap", whatsapp); localStorage.setItem("rifa_user_nome", nome); setUsuarioIdentificado(true); setEtapa(2); }} className="w-full h-12 bg-blue-600 disabled:opacity-50 hover:bg-blue-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 shadow-md">Continuar <ArrowRight size={16} /></button>
+                    <button disabled={!nome || whatsapp.length < 14} onClick={irParaTabela} className="w-full h-12 bg-blue-600 disabled:opacity-50 hover:bg-blue-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 shadow-md">Continuar <ArrowRight size={16} /></button>
                   </div>
                 </div>
               )}
